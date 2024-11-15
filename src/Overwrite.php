@@ -35,9 +35,9 @@ final class Overwrite
     public static function overwriteBlock(int $blockTypeId, Block $block): void {
         $instance = RuntimeBlockStateRegistry::getInstance();
 
-        (function(int $blockTypeId, Block $block) use ($instance): void {
+        (function(int $blockTypeId, Block $block): void {
             unset($this->typeIndex[$blockTypeId]);
-            $instance->register($block);
-        })->call($instance, $blockTypeId, fn() => clone $block);
+            $this->typeIndex[$blockTypeId] = $block;
+        })->call($instance, $blockTypeId, $block);
     }
 }
