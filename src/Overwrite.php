@@ -38,6 +38,6 @@ final class Overwrite
         (function(int $blockTypeId, Block $block) use ($instance): void {
             unset($this->typeIndex[$blockTypeId]);
             $instance->register($block);
-        })->call($instance, $blockTypeId, $block);
+        })->call($instance, $blockTypeId, fn() => clone $block);
     }
 }
