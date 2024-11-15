@@ -12,13 +12,18 @@ use pocketmine\world\format\io\GlobalItemDataHandlers;
 
 final class Overwrite
 {
+    protected array $creative;
+
     protected array $deserializers;
     protected array $itemSerializers;
 
     protected array $typeIndex;
 
     public static function overwriteItem(string $typeName, Item $item): void {
-        CreativeInventory::getInstance()->remove($item);
+        $creativeInventory = CreativeInventory::getInstance();
+        $creativeIndex = $creativeInventory->getItemIndex($item);
+
+        $creativeInventory->remove($item);
         StringToItemParser::getInstance()->override($typeName, fn() => $item);
 
         (function(string $id, Closure $deserializer): void {
@@ -29,15 +34,17 @@ final class Overwrite
             $this->itemSerializers[$item->getTypeId()] = $serializer;
         })->call(GlobalItemDataHandlers::getSerializer(), $item, fn() => new SavedItemData($typeName));
 
-        CreativeInventory::getInstance()->add($item);
+        (function(Item $item) use ($creativeIndex): void {
+            array_splice($this->creative, $creativeIndex, 0, [$item]);
+            $this->creative = array_values($this->creative);
+        })->call($creativeInventory, $item);
     }
 
-    public static function overwriteBlock(int $blockTypeId, Block $block): void {
-        $instance = RuntimeBlockStateRegistry::getInstance();
 
+    public static function overwriteBlock(int $blockTypeId, Block $block): void {
         (function(int $blockTypeId, Block $block): void {
             unset($this->typeIndex[$blockTypeId]);
             $this->typeIndex[$blockTypeId] = $block;
-        })->call($instance, $blockTypeId, $block);
+        })->call(RuntimeBlockStateRegistry::getInstance(), $blockTypeId, $block);
     }
 }
