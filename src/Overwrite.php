@@ -41,10 +41,22 @@ final class Overwrite
     }
 
 
-    public static function overwriteBlock(int $blockTypeId, Block $block): void {
-        (function(int $blockTypeId, Block $block): void {
-            unset($this->typeIndex[$blockTypeId]);
-            $this->typeIndex[$blockTypeId] = $block;
-        })->call(RuntimeBlockStateRegistry::getInstance(), $blockTypeId, $block);
+    /** @throws ReflectionException */
+    public static function overwriteBlock(Block $block): void {
+        $blockRegistry = RuntimeBlockStateRegistry::getInstance();
+        $creativeInv = CreativeInventory::getInstance();
+
+        $creativeInv->remove($block->asItem());
+
+        try {
+            $blockRegistry->register($block);
+        } catch (InvalidArgumentException) {
+            $property = (new ReflectionProperty($blockRegistry, "typeIndex"));
+            $typeIndex = $property->getValue($blockRegistry);
+            $typeIndex[$block->getTypeId()] = $block;
+            $property->setValue($blockRegistry, $typeIndex);
+        }
+
+        $creativeInv->add($block->asItem());
     }
 }
