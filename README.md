@@ -15,7 +15,7 @@ You must put it in the onLoad function in your Main class.
 Overwrite::overwriteItem(ItemTypeNames::FISHING_ROD, new FishingRod(new ItemIdentifier(ItemTypeIds::FISHING_ROD), "Fishing Rod"));
 
 //For blocks :
-Overwrite::overwriteBlock(BlockTypeIds::ANVIL, new Anvil(new BlockIdentifier(BlockTypeIds::ANVIL), "Anvil", new BlockTypeInfo(VanillaBlocks::ANVIL()->getBreakInfo())));
+Overwrite::overwriteBlock(static fn() => new Anvil(new BlockIdentifier(BlockTypeIds::ANVIL), "Anvil", new BlockTypeInfo(VanillaBlocks::ANVIL()->getBreakInfo())));
 ```
 
 ---
